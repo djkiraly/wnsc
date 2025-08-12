@@ -1,0 +1,26 @@
+{
+  "name": "west-nebraska-sports-council",
+  "version": "1.0.0",
+  "description": "Web application for West Nebraska Sports Council event and member management",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "start:detached": "concurrently -k \"npm run server:dev\" \"npm run client:dev\" --success first",
+    "stop": "pkill -f \"node.*server\" && pkill -f \"react-scripts\"",
+    "install:all": "npm install && npm run install:server && npm run install:client",
+    "install:server": "cd server && npm install",
+    "install:client": "cd client && npm install",
+    "server:dev": "cd server && npm run dev",
+    "server:start": "cd server && npm start",
+    "client:dev": "cd client && npm start",
+    "client:build": "cd client && npm run build",
+    "build": "npm run client:build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["sports", "council", "event-management", "member-coordination"],
+  "author": "West Nebraska Sports Council",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
