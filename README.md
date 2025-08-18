@@ -61,12 +61,36 @@ wnsc/
 
 ## ⚙️ Setup Instructions
 
-### Prerequisites
+### Quick Installation for Linux Servers
+
+For fresh Linux installations, use our automated installation script:
+
+```bash
+# Download and run the installation script
+curl -fsSL https://raw.githubusercontent.com/your-org/wnsc/main/install.sh | sudo bash
+
+# Or download and inspect first
+wget https://raw.githubusercontent.com/your-org/wnsc/main/install.sh
+chmod +x install.sh
+sudo ./install.sh
+```
+
+The installation script will:
+- Install Node.js 18, PostgreSQL 14, Nginx, and Git
+- Create application user and directories
+- Configure PostgreSQL database and user
+- Set up systemd services for production deployment
+- Configure firewall rules
+- Generate environment template files
+
+### Manual Setup (Development)
+
+#### Prerequisites
 - Node.js (v18 or higher)
 - PostgreSQL (v12 or higher)
 - Google OAuth 2.0 credentials
 
-### 1. Clone and Install Dependencies
+#### 1. Clone and Install Dependencies
 
 ```bash
 # Clone the repository
@@ -82,7 +106,7 @@ npm run install:server      # Server dependencies
 npm run install:client      # Client dependencies
 ```
 
-### 2. Database Setup
+#### 2. Database Setup
 
 ```bash
 # Create PostgreSQL database
@@ -96,7 +120,7 @@ npm run migrate
 npm run seed
 ```
 
-### 3. Environment Configuration
+#### 3. Environment Configuration
 
 Create `server/.env` file:
 
@@ -128,7 +152,7 @@ GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
 CLIENT_URL=http://localhost:3000
 ```
 
-### 4. Google OAuth Setup
+#### 4. Google OAuth Setup
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select existing
@@ -155,6 +179,37 @@ npm run client:dev
 ```
 
 ### Production Mode
+
+#### Using the Installation Script
+After running the installation script, deploy your application:
+
+```bash
+# Clone your application to the server
+sudo -u wnsc git clone <repository-url> /opt/wnsc
+cd /opt/wnsc
+
+# Install dependencies
+sudo -u wnsc npm run install:all
+
+# Configure environment
+sudo cp .env.template server/.env
+sudo nano server/.env  # Update with your OAuth credentials and secrets
+
+# Run database migrations
+cd server && sudo -u wnsc npm run migrate
+
+# Build frontend for production
+cd .. && sudo -u wnsc npm run build
+
+# Start the service
+sudo systemctl start wnsc-server
+sudo systemctl enable wnsc-server
+
+# Check service status
+sudo systemctl status wnsc-server
+```
+
+#### Manual Production Setup
 
 ```bash
 # Build frontend
@@ -270,6 +325,51 @@ npm run server:start
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🖥️ Production Deployment
+
+### System Requirements
+- **OS**: Ubuntu 20.04+ / CentOS 8+ / Debian 11+
+- **RAM**: 2GB minimum, 4GB recommended
+- **Storage**: 10GB minimum
+- **CPU**: 2 cores minimum
+
+### Security Considerations
+- Change all default passwords and secrets
+- Configure SSL/TLS certificates (Let's Encrypt recommended)
+- Set up regular database backups
+- Configure log rotation
+- Update firewall rules for your specific needs
+- Regular security updates
+
+### Monitoring and Logs
+```bash
+# Service status
+sudo systemctl status wnsc-server
+
+# View logs
+sudo journalctl -u wnsc-server -f
+
+# PM2 process monitoring (if using PM2)
+sudo -u wnsc pm2 status
+sudo -u wnsc pm2 logs
+```
+
+### Backup and Maintenance
+```bash
+# Database backup
+sudo -u postgres pg_dump wnsc_db > backup_$(date +%Y%m%d).sql
+
+# Application backup
+sudo tar -czf wnsc_backup_$(date +%Y%m%d).tar.gz /opt/wnsc
+
+# Update application
+cd /opt/wnsc
+sudo -u wnsc git pull
+sudo -u wnsc npm run install:all
+sudo -u wnsc npm run build
+sudo systemctl restart wnsc-server
+```
 
 ## 🔮 Future Enhancements
 

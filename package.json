@@ -17,10 +17,18 @@
     "build": "npm run client:build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["sports", "council", "event-management", "member-coordination"],
+  "keywords": [
+    "sports",
+    "council",
+    "event-management",
+    "member-coordination"
+  ],
   "author": "West Nebraska Sports Council",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "nginx": "^1.1.0"
   }
 }

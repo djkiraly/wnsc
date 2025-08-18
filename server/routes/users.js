@@ -26,6 +26,29 @@ router.get('/', requireAdmin, async (req, res) => {
   }
 });
 
+// Get users for assignment (for dropdowns, etc.)
+router.get('/assignable', requireAuth, async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT id, first_name, last_name, email, role, organization
+      FROM users 
+      WHERE status = 'active'
+      ORDER BY first_name, last_name
+    `);
+    
+    res.json({
+      success: true,
+      users: result.rows
+    });
+  } catch (error) {
+    console.error('Error fetching assignable users:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch users'
+    });
+  }
+});
+
 // Get user profile
 router.get('/profile', requireAuth, async (req, res) => {
   try {

@@ -16,10 +16,13 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import EventsPage from './pages/EventsPage';
 import EventDetailPage from './pages/EventDetailPage';
+import EventDashboard from './pages/EventDashboard';
 import TasksPage from './pages/TasksPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import DirectoryPage from './pages/DirectoryPage';
+import SystemSettings from './pages/SystemSettings';
+import GmailCallback from './pages/GmailCallback';
 
 function App() {
   return (
@@ -69,6 +72,14 @@ function App() {
               </ProtectedRoute>
             } />
             
+            <Route path="/events/:id/dashboard" element={
+              <ProtectedRoute>
+                <Layout>
+                  <EventDashboard />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
             <Route path="/events/:id" element={
               <ProtectedRoute>
                 <Layout>
@@ -108,6 +119,16 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            
+            <Route path="/settings" element={
+              <ProtectedRoute requiredRole={['admin']}>
+                <Layout>
+                  <SystemSettings />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/settings/gmail/callback" element={<GmailCallback />} />
             
             {/* Fallback Route */}
             <Route path="*" element={
