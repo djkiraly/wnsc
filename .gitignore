@@ -2,3 +2,4 @@ node_modules
 *.pkl
 *.pack
 /.serena
+.serena/cache/typescript/document_symbols_cache_v23-06-25.pkl
