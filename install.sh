@@ -388,7 +388,7 @@ Application Details:
 - Database user: $DB_USER
 
 Next Steps:
-1. Clone your application code to $APP_DIR
+1. Clone your application code: git clone https://github.com/djkiraly/wnsc.git $APP_DIR
 2. Copy $APP_DIR/.env.template to $APP_DIR/server/.env
 3. Update the .env file with your Google OAuth credentials and secure secrets
 4. Install application dependencies: cd $APP_DIR && npm run install:all
@@ -457,7 +457,7 @@ main() {
     warning "Next steps:"
     echo "1. Review /root/wnsc_installation_summary.txt"
     echo "2. Review /root/wnsc_db_credentials.txt"
-    echo "3. Clone your application code to $APP_DIR"
+    echo "3. Clone application: git clone https://github.com/djkiraly/wnsc.git $APP_DIR"
     echo "4. Configure your .env file with OAuth credentials"
     echo "5. Install dependencies and run migrations"
     echo

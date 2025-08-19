@@ -73,10 +73,10 @@ For fresh Linux installations, use our automated installation script:
 
 ```bash
 # Download and run the installation script
-curl -fsSL https://raw.githubusercontent.com/your-org/wnsc/main/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/djkiraly/wnsc/main/install.sh | sudo bash
 
 # Or download and inspect first
-wget https://raw.githubusercontent.com/your-org/wnsc/main/install.sh
+wget https://raw.githubusercontent.com/djkiraly/wnsc/main/install.sh
 chmod +x install.sh
 sudo ./install.sh
 ```
@@ -100,7 +100,7 @@ The installation script will:
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/djkiraly/wnsc.git
 cd wnsc
 
 # Install all dependencies (root, server, and client)
@@ -194,7 +194,7 @@ After running the installation script, deploy your application:
 
 ```bash
 # Clone your application to the server
-sudo -u wnsc git clone <repository-url> /opt/wnsc
+sudo -u wnsc git clone https://github.com/djkiraly/wnsc.git /opt/wnsc
 cd /opt/wnsc
 
 # Install dependencies
