@@ -12,6 +12,10 @@
 
 set -e  # Exit on any error
 
+# Set non-interactive mode for package installations
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -70,8 +74,9 @@ update_system() {
     log "Updating system packages..."
     case $DISTRO in
         ubuntu|debian)
-            apt-get update && apt-get upgrade -y
-            apt-get install -y curl wget gnupg2 software-properties-common apt-transport-https ca-certificates lsb-release
+            apt-get update
+            apt-get upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
+            apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" curl wget gnupg2 software-properties-common apt-transport-https ca-certificates lsb-release
             ;;
         centos|rhel|fedora)
             if command -v dnf &> /dev/null; then
@@ -98,7 +103,7 @@ install_nodejs() {
     
     case $DISTRO in
         ubuntu|debian)
-            apt-get install -y nodejs
+            apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" nodejs
             ;;
         centos|rhel|fedora)
             if command -v dnf &> /dev/null; then
@@ -127,7 +132,7 @@ install_postgresql() {
             wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
             echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
             apt-get update
-            apt-get install -y postgresql-$POSTGRES_VERSION postgresql-client-$POSTGRES_VERSION postgresql-contrib-$POSTGRES_VERSION
+            apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" postgresql-$POSTGRES_VERSION postgresql-client-$POSTGRES_VERSION postgresql-contrib-$POSTGRES_VERSION
             ;;
         centos|rhel|fedora)
             if command -v dnf &> /dev/null; then
@@ -215,7 +220,7 @@ install_git() {
     
     case $DISTRO in
         ubuntu|debian)
-            apt-get install -y git
+            apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" git
             ;;
         centos|rhel|fedora)
             if command -v dnf &> /dev/null; then
@@ -235,7 +240,7 @@ install_nginx() {
     
     case $DISTRO in
         ubuntu|debian)
-            apt-get install -y nginx
+            apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" nginx
             ;;
         centos|rhel|fedora)
             if command -v dnf &> /dev/null; then
