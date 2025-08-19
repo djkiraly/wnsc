@@ -53,9 +53,15 @@ wnsc/
 - **event_participants** - Many-to-many relationship for event registration
 - **notifications** - User notification system
 - **user_sessions** - Session storage
+- **system_settings** - Application-wide configuration settings
+- **gmail_credentials** - Gmail API integration credentials
+- **email_templates** - Customizable email templates
+- **email_logs** - Email delivery tracking and logs
+- **notes** - Event-related notes and documentation
+- **contacts** - Directory of contacts with event associations
 
 ### User Roles
-- **Admin** - Full system access
+- **Admin** - Full system access including user management and system settings
 - **Organizer** - Can create/manage events and tasks
 - **Member** - Can participate in events and view assigned tasks
 
@@ -114,7 +120,10 @@ createdb wnsc_db
 
 # Run migrations to create tables
 cd server
-npm run migrate
+npm run migrate                    # Create base tables
+npm run migrate:event-management   # Add event management features (notes, contacts)
+npm run migrate:directory         # Update directory table structure
+npm run migrate:email-settings     # Add email system tables
 
 # (Optional) Seed with sample data
 npm run seed
@@ -251,6 +260,21 @@ npm run server:start
 - `DELETE /api/tasks/:id` - Delete task (organizer+)
 - `PATCH /api/tasks/:id/status` - Update task status
 
+### System Settings (Admin Only)
+- `GET /api/settings` - Get all system settings
+- `PUT /api/settings/:key` - Update setting value
+- `GET /api/settings/gmail/status` - Get Gmail integration status
+- `GET /api/settings/gmail/auth` - Initiate Gmail OAuth
+- `DELETE /api/settings/gmail/disconnect` - Disconnect Gmail
+- `GET /api/settings/email-templates` - Get email templates
+- `GET /api/settings/email-logs` - Get email delivery logs
+
+### Directory
+- `GET /api/directory` - Get all contacts
+- `POST /api/directory` - Create contact
+- `PUT /api/directory/:id` - Update contact
+- `DELETE /api/directory/:id` - Delete contact
+
 ## 🔐 Authentication Flow
 
 1. User clicks "Sign in with Google"
@@ -270,13 +294,15 @@ npm run server:start
 ### Pages
 - `HomePage` - Public landing page
 - `LoginPage` - Google OAuth login
-- `DashboardPage` - User dashboard with overview
-- `EventsPage` - Event listing and management
-- `TasksPage` - Task management interface
-- `ProfilePage` - User profile management
-- `AdminPage` - Administrative interface
+- `DashboardPage` - User dashboard with role-based tools
+- `EventsPage` - Event listing and management with creation/editing modals
+- `TasksPage` - Task management interface with assignment workflow
+- `ProfilePage` - User profile management with tabbed interface
+- `AdminPage` - Administrative interface with user management and system settings
+- `DirectoryPage` - Contact directory with event associations
+- `EventDetailPage` - Detailed event view with participants and tasks
 
-## 🚧 Development Status - Phase 1 Complete
+## 🚧 Development Status - Core Features Complete
 
 ✅ **Completed Features:**
 - Project structure setup
@@ -285,15 +311,21 @@ npm run server:start
 - React 18+ frontend with Tailwind CSS
 - Context API state management
 - Protected routing with role-based access
-- Basic UI foundation and navigation
-
-🔄 **Next Phase (Phase 2) - Core Functionality:**
-- Complete event management system
+- Complete event management system with modals
 - Task creation and assignment workflow
-- User profile editing
-- Real-time notifications
-- Event registration system
-- Dashboard data integration
+- User profile management with tabbed interface
+- Admin panel with user management
+- Integrated system settings (email, Gmail integration, templates, logs)
+- Event registration and participation system
+- Directory management with contact associations
+- Dashboard with role-based organizer tools
+
+🔄 **Future Enhancements:**
+- Real-time notifications system
+- Advanced reporting and analytics
+- Email template editor
+- File upload and document management
+- Mobile responsive optimizations
 
 ## 📝 Available Scripts
 
@@ -306,7 +338,10 @@ npm run server:start
 
 ### Server Scripts
 - `npm run dev` - Start server with nodemon
-- `npm run migrate` - Run database migrations
+- `npm run migrate` - Run base database migrations
+- `npm run migrate:event-management` - Add event management tables
+- `npm run migrate:directory` - Update directory table
+- `npm run migrate:email-settings` - Add email system tables
 - `npm run seed` - Seed database with sample data
 
 ### Client Scripts
@@ -377,6 +412,11 @@ sudo systemctl restart wnsc-server
 - Mobile app with React Native
 - Advanced reporting and analytics
 - Integration with external calendar systems
-- Email notification system
+- Enhanced email notification workflows
 - File upload and document management
 - Multi-language support
+- Calendar integration (Google Calendar, Outlook)
+- SMS notifications
+- Event check-in/check-out system
+- Payment processing integration
+- Advanced user permission system

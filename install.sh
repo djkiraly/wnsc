@@ -371,6 +371,16 @@ Installed Components:
 - PM2 (process manager)
 - Git
 
+Application Features:
+- Google OAuth 2.0 authentication
+- Event management with registration
+- Task assignment and tracking
+- User management and role-based access
+- Admin panel with system settings
+- Gmail integration for notifications
+- Contact directory management
+- Email template system
+
 Application Details:
 - Application user: $APP_USER
 - Application directory: $APP_DIR
@@ -382,7 +392,12 @@ Next Steps:
 2. Copy $APP_DIR/.env.template to $APP_DIR/server/.env
 3. Update the .env file with your Google OAuth credentials and secure secrets
 4. Install application dependencies: cd $APP_DIR && npm run install:all
-5. Run database migrations: cd $APP_DIR/server && npm run migrate
+5. Run database migrations:
+   cd $APP_DIR/server
+   npm run migrate                    # Base tables
+   npm run migrate:event-management   # Event management features
+   npm run migrate:directory         # Directory updates
+   npm run migrate:email-settings     # Email system
 6. Build the frontend: cd $APP_DIR && npm run build
 7. Start the service: systemctl start wnsc-server && systemctl enable wnsc-server
 
