@@ -15,6 +15,7 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const eventRoutes = require('./routes/events');
 const taskRoutes = require('./routes/tasks');
+const profileRoutes = require('./routes/profile');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -64,6 +65,7 @@ app.use('/api/events', require('./routes/events'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/directory', require('./routes/directory'));
 app.use('/api/settings', require('./routes/settings'));
+app.use('/api/profile', profileRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

@@ -21,7 +21,6 @@ import TasksPage from './pages/TasksPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import DirectoryPage from './pages/DirectoryPage';
-import SystemSettings from './pages/SystemSettings';
 import GmailCallback from './pages/GmailCallback';
 
 function App() {
@@ -120,13 +119,6 @@ function App() {
               </ProtectedRoute>
             } />
             
-            <Route path="/settings" element={
-              <ProtectedRoute requiredRole={['admin']}>
-                <Layout>
-                  <SystemSettings />
-                </Layout>
-              </ProtectedRoute>
-            } />
             
             <Route path="/settings/gmail/callback" element={<GmailCallback />} />
             

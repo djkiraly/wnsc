@@ -10,8 +10,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   ArrowRightOnRectangleIcon,
-  BookOpenIcon,
-  AdjustmentsHorizontalIcon
+  BookOpenIcon
 } from '@heroicons/react/24/outline';
 
 const Layout = ({ children }) => {
@@ -31,7 +30,6 @@ const Layout = ({ children }) => {
   // Add admin navigation for admin users
   if (user?.role === 'admin') {
     navigation.push({ name: 'Admin', href: '/admin', icon: CogIcon });
-    navigation.push({ name: 'Settings', href: '/settings', icon: AdjustmentsHorizontalIcon });
   }
 
   const handleLogout = async () => {

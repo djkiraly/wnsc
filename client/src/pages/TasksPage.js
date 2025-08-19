@@ -144,6 +144,33 @@ const TasksPage = () => {
     }
   };
 
+  const updateTask = async (taskData) => {
+    try {
+      const response = await fetch(`/api/tasks/${selectedTask.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(taskData)
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        fetchTasks(); // Refresh the list
+        setShowEditModal(false);
+        setSelectedTask(null);
+        return data;
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error) {
+      console.error('Error updating task:', error);
+      throw error;
+    }
+  };
+
   const updateTaskStatus = async (taskId, newStatus) => {
     try {
       const response = await fetch(`/api/tasks/${taskId}/status`, {
@@ -718,6 +745,298 @@ const TasksPage = () => {
           )}
         </div>
       )}
+
+      {/* Task Creation Modal */}
+      {showAddModal && (
+        <TaskModal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          onSave={addTask}
+          events={events}
+          users={users}
+          title="Create New Task"
+        />
+      )}
+
+      {/* Task Edit Modal */}
+      {showEditModal && selectedTask && (
+        <TaskModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedTask(null);
+          }}
+          onSave={updateTask}
+          task={selectedTask}
+          events={events}
+          users={users}
+          title="Edit Task"
+        />
+      )}
+    </div>
+  );
+};
+
+// Task Modal Component
+const TaskModal = ({ isOpen, onClose, onSave, task, events, users, title }) => {
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    priority: 'medium',
+    status: 'pending',
+    due_date: '',
+    assigned_to: '',
+    event_id: ''
+  });
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (task) {
+      setFormData({
+        title: task.title || '',
+        description: task.description || '',
+        priority: task.priority || 'medium',
+        status: task.status || 'pending',
+        due_date: task.due_date ? new Date(task.due_date).toISOString().slice(0, 10) : '',
+        assigned_to: task.assigned_to || '',
+        event_id: task.event_id || ''
+      });
+    } else {
+      setFormData({
+        title: '',
+        description: '',
+        priority: 'medium',
+        status: 'pending',
+        due_date: '',
+        assigned_to: '',
+        event_id: ''
+      });
+    }
+    setErrors({});
+  }, [task]);
+
+  const handleInputChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+    if (errors[field]) {
+      setErrors({ ...errors, [field]: '' });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.title.trim()) {
+      newErrors.title = 'Task title is required';
+    }
+
+    if (!formData.event_id) {
+      newErrors.event_id = 'Event association is required';
+    }
+
+    if (formData.due_date && new Date(formData.due_date) < new Date().setHours(0, 0, 0, 0)) {
+      newErrors.due_date = 'Due date cannot be in the past';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSave = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const dataToSend = {
+        ...formData,
+        assigned_to: formData.assigned_to || null,
+        due_date: formData.due_date || null
+      };
+      await onSave(dataToSend);
+      onClose();
+    } catch (error) {
+      setErrors({ general: error.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div className="relative top-20 mx-auto p-5 border max-w-2xl shadow-lg rounded-md bg-white">
+        <div className="mt-3">
+          {/* Modal Header */}
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+            <button
+              className="text-gray-400 hover:text-gray-600"
+              onClick={onClose}
+              disabled={saving}
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Form */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Task Title *
+              </label>
+              <input
+                type="text"
+                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.title ? 'border-red-300' : 'border-gray-300'
+                }`}
+                value={formData.title}
+                onChange={(e) => handleInputChange('title', e.target.value)}
+                placeholder="Enter task title"
+              />
+              {errors.title && <p className="text-xs text-red-600 mt-1">{errors.title}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <textarea
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={3}
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                placeholder="Enter task description"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Event *
+                </label>
+                <select
+                  className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.event_id ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                  value={formData.event_id}
+                  onChange={(e) => handleInputChange('event_id', e.target.value)}
+                >
+                  <option value="">Select Event</option>
+                  {events.map(event => (
+                    <option key={event.id} value={event.id}>{event.title}</option>
+                  ))}
+                </select>
+                {errors.event_id && <p className="text-xs text-red-600 mt-1">{errors.event_id}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Assigned To
+                </label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={formData.assigned_to}
+                  onChange={(e) => handleInputChange('assigned_to', e.target.value)}
+                >
+                  <option value="">Unassigned</option>
+                  {users.map(user => (
+                    <option key={user.id} value={user.id}>
+                      {user.first_name} {user.last_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Priority
+                </label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={formData.priority}
+                  onChange={(e) => handleInputChange('priority', e.target.value)}
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={formData.status}
+                  onChange={(e) => handleInputChange('status', e.target.value)}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Due Date
+                </label>
+                <input
+                  type="date"
+                  className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.due_date ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                  value={formData.due_date}
+                  onChange={(e) => handleInputChange('due_date', e.target.value)}
+                />
+                {errors.due_date && <p className="text-xs text-red-600 mt-1">{errors.due_date}</p>}
+              </div>
+            </div>
+          </div>
+
+          {/* Error Message */}
+          {errors.general && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{errors.general}</p>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200 mt-6">
+            <button
+              className="btn-secondary"
+              onClick={onClose}
+              disabled={saving}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn-primary flex items-center"
+              onClick={handleSave}
+              disabled={saving}
+            >
+              {saving ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <CheckCircleIcon className="h-4 w-4 mr-2" />
+                  {task ? 'Update Task' : 'Create Task'}
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
