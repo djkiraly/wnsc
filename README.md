@@ -72,13 +72,18 @@ wnsc/
 For fresh Linux installations, use our automated installation script:
 
 ```bash
-# Download and run the installation script
-curl -fsSL https://raw.githubusercontent.com/djkiraly/wnsc/main/install.sh | sudo bash
+# Clone the repository first
+git clone https://github.com/djkiraly/wnsc.git
+cd wnsc
 
-# Or download and inspect first
-wget https://raw.githubusercontent.com/djkiraly/wnsc/main/install.sh
-chmod +x install.sh
+# Run the installation script
 sudo ./install.sh
+```
+
+**Alternative**: If the repository is public, you can run directly:
+```bash
+# Direct download and run (requires public repository)
+curl -fsSL https://raw.githubusercontent.com/djkiraly/wnsc/main/install.sh | sudo bash
 ```
 
 The installation script will:
@@ -88,6 +93,8 @@ The installation script will:
 - Set up systemd services for production deployment
 - Configure firewall rules
 - Generate environment template files
+
+**Note**: The direct curl method requires the repository to be public. If you get a 404 error, clone the repository first and run the script locally.
 
 ### Manual Setup (Development)
 

@@ -2,6 +2,13 @@
 
 # West Nebraska Sports Council - Installation Script
 # This script installs the WNSC application on a fresh Linux system
+#
+# Usage:
+#   1. Clone repository: git clone https://github.com/djkiraly/wnsc.git
+#   2. Run script: sudo ./install.sh
+#
+# Or download directly (requires public repository):
+#   curl -fsSL https://raw.githubusercontent.com/djkiraly/wnsc/main/install.sh | sudo bash
 
 set -e  # Exit on any error
 
