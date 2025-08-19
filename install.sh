@@ -257,6 +257,125 @@ install_nginx() {
     success "Nginx installed successfully"
 }
 
+# Configure Nginx as reverse proxy
+configure_nginx() {
+    log "Configuring Nginx as reverse proxy..."
+    
+    # Create nginx configuration for WNSC
+    cat > /etc/nginx/sites-available/wnsc << 'EOF'
+server {
+    listen 80;
+    server_name _;
+    
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied expired no-cache no-store private must-revalidate auth;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/javascript;
+    
+    # Client max body size for file uploads
+    client_max_body_size 10M;
+    
+    # Serve static files directly
+    location /static/ {
+        alias $APP_DIR/client/build/static/;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files \$uri =404;
+    }
+    
+    # API routes - proxy to backend
+    location /api/ {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_cache_bypass \$http_upgrade;
+        proxy_read_timeout 86400;
+    }
+    
+    # Auth routes - proxy to backend
+    location /auth/ {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_cache_bypass \$http_upgrade;
+    }
+    
+    # Frontend - serve React app
+    location / {
+        root $APP_DIR/client/build;
+        index index.html index.htm;
+        try_files \$uri \$uri/ /index.html;
+        
+        # Cache control for HTML files
+        location ~* \.html\$ {
+            expires -1;
+            add_header Cache-Control "no-cache, no-store, must-revalidate";
+        }
+        
+        # Cache control for assets
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)\$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+    }
+    
+    # Health check endpoint
+    location /health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
+    }
+    
+    # Block access to sensitive files
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+    
+    location ~ /\.env {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+}
+EOF
+
+    # Enable the site
+    if [ -f /etc/nginx/sites-enabled/default ]; then
+        rm /etc/nginx/sites-enabled/default
+    fi
+    
+    ln -sf /etc/nginx/sites-available/wnsc /etc/nginx/sites-enabled/
+    
+    # Test nginx configuration
+    nginx -t
+    
+    # Reload nginx
+    systemctl reload nginx
+    
+    success "Nginx reverse proxy configured"
+}
+
 # Install PM2 for process management
 install_pm2() {
     log "Installing PM2 process manager..."
@@ -358,10 +477,10 @@ SESSION_SECRET=REPLACE_WITH_SECURE_SESSION_SECRET
 # Google OAuth 2.0 Configuration
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
+GOOGLE_CALLBACK_URL=http://your-domain.com/api/auth/google/callback
 
-# Frontend URL
-CLIENT_URL=http://localhost:3000
+# Frontend URL (served by nginx)
+CLIENT_URL=http://your-domain.com
 EOF
 
     chown $APP_USER:$APP_USER $APP_DIR/.env.template
@@ -379,7 +498,7 @@ Installation completed on: $(date)
 Installed Components:
 - Node.js $(node --version)
 - PostgreSQL $POSTGRES_VERSION
-- Nginx (web server)
+- Nginx (reverse proxy configured for port 80)
 - PM2 (process manager)
 - Git
 
@@ -417,17 +536,30 @@ Configuration Files:
 - Database credentials: /root/wnsc_db_credentials.txt
 - Environment template: $APP_DIR/.env.template
 - Systemd service: /etc/systemd/system/wnsc-server.service
+- Nginx configuration: /etc/nginx/sites-available/wnsc
+
+Network Configuration:
+- Application will be accessible on port 80 (HTTP)
+- Backend runs on localhost:5000 (proxied by nginx)
+- Static files served directly by nginx for better performance
 
 Useful Commands:
 - Check service status: systemctl status wnsc-server
 - View service logs: journalctl -u wnsc-server -f
 - Restart service: systemctl restart wnsc-server
+- Check nginx status: systemctl status nginx
+- Test nginx config: nginx -t
+- Reload nginx: systemctl reload nginx
+- View nginx logs: tail -f /var/log/nginx/access.log
 
 Security Notes:
 - Change default database password
 - Generate secure JWT and session secrets
-- Configure SSL/TLS certificates for production
+- Configure SSL/TLS certificates (Let's Encrypt recommended)
+- Update nginx configuration with your domain name
+- Update Google OAuth URLs to match your domain
 - Review and update firewall rules as needed
+- Consider setting up fail2ban for additional security
 EOF
 
     success "Installation summary created at /root/wnsc_installation_summary.txt"
@@ -452,6 +584,7 @@ main() {
     configure_postgresql
     create_app_user
     install_nginx
+    configure_nginx
     install_pm2
     configure_firewall
     create_systemd_services

@@ -90,6 +90,7 @@ The installation script will:
 - Install Node.js 18, PostgreSQL 14, Nginx, and Git
 - Create application user and directories
 - Configure PostgreSQL database and user
+- Set up Nginx as reverse proxy (serves application on port 80)
 - Set up systemd services for production deployment
 - Configure firewall rules
 - Generate environment template files
@@ -388,13 +389,19 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ```bash
 # Service status
 sudo systemctl status wnsc-server
+sudo systemctl status nginx
 
 # View logs
 sudo journalctl -u wnsc-server -f
+sudo tail -f /var/log/nginx/access.log
+sudo tail -f /var/log/nginx/error.log
 
 # PM2 process monitoring (if using PM2)
 sudo -u wnsc pm2 status
 sudo -u wnsc pm2 logs
+
+# Test nginx configuration
+sudo nginx -t
 ```
 
 ### Backup and Maintenance
