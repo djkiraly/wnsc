@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(npm run build:*)",
+      "Bash(move login \"\\(auth\\)\\\\login\")",
+      "Bash(move dashboard \"\\(dashboard\\)\\\\dashboard\")",
+      "Bash(move events \"\\(dashboard\\)\\\\events\")",
+      "Bash(move contacts \"\\(dashboard\\)\\\\contacts\")",
+      "Bash(move tasks \"\\(dashboard\\)\\\\tasks\")",
+      "Bash(move users \"\\(dashboard\\)\\\\users\")",
+      "Bash(move settings \"\\(dashboard\\)\\\\settings\")",
+      "Bash(move profile:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(npx prisma migrate status)",
+      "Bash(npx prisma db seed)",
+      "Bash(npx prisma generate:*)",
+      "Bash(node prisma/seed.js:*)",
+      "Bash(npx next build)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npm install:*)",
+      "Bash(npx prisma db push:*)"
+    ]
+  }
+}

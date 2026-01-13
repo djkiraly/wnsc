@@ -1,0 +1,304 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User management
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  passwordHash  String
+  name          String
+  role          Role         @default(EDITOR)
+  memberStatus  MemberStatus @default(VISITOR)
+  phone         String?
+  address       String?
+  city          String?
+  state         String?
+  zip           String?
+  bio           String?      @db.Text
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  lastLogin     DateTime?
+  active        Boolean      @default(true)
+
+  // Email verification
+  emailVerified           Boolean   @default(false)
+  emailVerificationToken  String?   @unique
+  emailVerificationExpires DateTime?
+
+  // Admin approval
+  approved      Boolean   @default(false)
+  approvedById  String?
+  approvedBy    User?     @relation("ApprovedUsers", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt    DateTime?
+  rejectionReason String?
+
+  // Relations
+  events        Event[]
+  tasks         Task[]    @relation("AssignedTasks")
+  createdTasks  Task[]    @relation("CreatedTasks")
+  contacts      Contact[]
+  notes         Note[]
+  approvedUsers User[]    @relation("ApprovedUsers")
+
+  @@index([emailVerified, approved])
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+}
+
+enum MemberStatus {
+  VISITOR
+  MEMBER
+  VOTING_MEMBER
+  PRESIDENT
+  VICE_PRESIDENT
+  TREASURER
+  SECRETARY
+}
+
+// Event management
+model Event {
+  id              String      @id @default(cuid())
+  title           String
+  slug            String      @unique
+  description     String      @db.Text
+  category        String
+  startDate       DateTime
+  endDate         DateTime
+  location        String
+  venueName       String?
+  contactName     String?
+  contactEmail    String?
+  contactPhone    String?
+  featuredImage   String?
+  registrationUrl String?
+  status          EventStatus @default(DRAFT)
+  metaDescription String?
+  keywords        String?
+  views           Int         @default(0)
+  published       Boolean     @default(false)
+  createdById     String?
+  createdBy       User?       @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  notes           Note[]
+  contacts        Contact[]
+  tasks           Task[]
+  eventViews      EventView[]
+
+  @@index([status, published])
+  @@index([startDate])
+  @@index([createdById])
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+}
+
+// Contact form submissions
+model Contact {
+  id              String        @id @default(cuid())
+  name            String
+  email           String
+  phone           String?
+  organization    String?
+  inquiryType     InquiryType
+  message         String        @db.Text
+  attachmentUrl   String?
+  status          ContactStatus @default(NEW)
+  assignedToId    String?
+  assignedTo      User?         @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  eventId         String?
+  event           Event?        @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  ipAddress       String?
+  userAgent       String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  notes           Note[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([assignedToId])
+}
+
+enum InquiryType {
+  HOSTING_EVENT
+  PARTNERSHIP
+  GENERAL_INQUIRY
+  MEDIA
+}
+
+enum ContactStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  ARCHIVED
+}
+
+// Task management
+model Task {
+  id            String     @id @default(cuid())
+  title         String
+  description   String?    @db.Text
+  status        TaskStatus @default(TODO)
+  priority      Priority   @default(MEDIUM)
+  dueDate       DateTime?
+  assignedToId  String?
+  assignedTo    User?      @relation("AssignedTasks", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdById   String
+  createdBy     User       @relation("CreatedTasks", fields: [createdById], references: [id], onDelete: Cascade)
+  eventId       String?
+  event         Event?     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  checklist     Json?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  completedAt   DateTime?
+
+  @@index([status])
+  @@index([dueDate])
+  @@index([assignedToId])
+  @@index([createdById])
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// Notes system
+model Note {
+  id          String    @id @default(cuid())
+  title       String?
+  content     String    @db.Text
+  tags        String[]
+  isPrivate   Boolean   @default(false)
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  eventId     String?
+  event       Event?    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  contactId   String?
+  contact     Contact?  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([authorId])
+  @@index([eventId])
+  @@index([contactId])
+}
+
+// Analytics tracking
+model PageView {
+  id            String    @id @default(cuid())
+  page          String
+  path          String
+  referrer      String?
+  ipAddress     String?
+  userAgent     String?
+  deviceType    String?
+  browser       String?
+  country       String?
+  region        String?
+  city          String?
+  sessionId     String?
+  timestamp     DateTime  @default(now())
+
+  @@index([timestamp])
+  @@index([page])
+  @@index([path])
+}
+
+model EventView {
+  id          String    @id @default(cuid())
+  eventId     String
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  ipAddress   String?
+  userAgent   String?
+  referrer    String?
+  sessionId   String?
+  timestamp   DateTime  @default(now())
+
+  @@index([eventId])
+  @@index([timestamp])
+}
+
+// Event submissions from public
+model EventSubmission {
+  id              String               @id @default(cuid())
+  // Event details
+  title           String
+  description     String               @db.Text
+  category        String
+  startDate       DateTime
+  endDate         DateTime
+  location        String
+  venueName       String?
+  // Submitter contact info
+  submitterName   String
+  submitterEmail  String
+  submitterPhone  String?
+  organization    String?
+  // Additional info
+  expectedAttendees String?
+  additionalNotes String?              @db.Text
+  // Status tracking
+  status          SubmissionStatus     @default(PENDING)
+  reviewNotes     String?              @db.Text
+  reviewedById    String?
+  reviewedAt      DateTime?
+  // Metadata
+  ipAddress       String?
+  userAgent       String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum SubmissionStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+// Newsletter subscriptions
+model Newsletter {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String?
+  active         Boolean   @default(true)
+  subscribedAt   DateTime  @default(now())
+  unsubscribedAt DateTime?
+}
+
+// Site settings
+model Setting {
+  id          String    @id @default(cuid())
+  key         String    @unique
+  value       String    @db.Text
+  updatedAt   DateTime  @updatedAt
+}
