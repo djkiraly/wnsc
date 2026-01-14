@@ -21,6 +21,7 @@
     "prisma:studio": "prisma studio"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.18.0",
     "@prisma/client": "^6.19.2",
     "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.1",

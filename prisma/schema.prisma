@@ -302,3 +302,207 @@ model Setting {
   value       String    @db.Text
   updatedAt   DateTime  @updatedAt
 }
+
+// ===========================================
+// CMS Content Models
+// ===========================================
+
+// Facilities management
+model Facility {
+  id               String          @id @default(cuid())
+  name             String
+  slug             String          @unique
+  description      String          @db.Text
+  shortDescription String?
+  address          String
+  city             String
+  state            String
+  zip              String?
+  phone            String?
+  email            String?
+  website          String?
+  capacity         Int?
+  amenities        String[]
+  sportTypes       String[]
+  featuredImage    String?
+  isPublic         Boolean         @default(true)
+  isFeatured       Boolean         @default(false)
+  mapEmbedUrl      String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  photos           FacilityPhoto[]
+
+  @@index([isPublic, isFeatured])
+  @@index([city])
+}
+
+model FacilityPhoto {
+  id         String   @id @default(cuid())
+  facilityId String
+  facility   Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  url        String
+  caption    String?
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([facilityId])
+}
+
+// Testimonials
+model Testimonial {
+  id           String   @id @default(cuid())
+  quote        String   @db.Text
+  personName   String
+  personTitle  String?
+  organization String?
+  eventName    String?
+  rating       Int?     @default(5)
+  photoUrl     String?
+  isActive     Boolean  @default(true)
+  isFeatured   Boolean  @default(false)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isActive, isFeatured])
+}
+
+// Regional attractions
+model Attraction {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String   @db.Text
+  category    String   // outdoor, museum, dining, entertainment, shopping
+  address     String?
+  city        String
+  phone       String?
+  website     String?
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, category])
+  @@index([city])
+}
+
+// Accommodations
+model Accommodation {
+  id         String   @id @default(cuid())
+  name       String
+  slug       String   @unique
+  description String?  @db.Text
+  type       String   // hotel, motel, campground, bnb
+  address    String
+  city       String
+  phone      String?
+  email      String?
+  website    String?
+  bookingUrl String?
+  priceRange String?  // $, $$, $$$
+  roomCount  Int?
+  amenities  String[]
+  imageUrl   String?
+  isPartner  Boolean  @default(false)
+  isActive   Boolean  @default(true)
+  isFeatured Boolean  @default(false)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([isActive, type])
+  @@index([city])
+}
+
+// Partners and sponsors
+model Partner {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?     @db.Text
+  logoUrl     String?
+  website     String?
+  tier        PartnerTier @default(COMMUNITY)
+  isActive    Boolean     @default(true)
+  sortOrder   Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([isActive, tier])
+}
+
+enum PartnerTier {
+  PRESENTING
+  GOLD
+  SILVER
+  BRONZE
+  COMMUNITY
+}
+
+// FAQs
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String   @db.Text
+  category  String   @default("General")
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, category])
+}
+
+// Downloadable resources
+model Resource {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  fileUrl     String
+  fileName    String
+  fileType    String
+  fileSize    Int?
+  category    String   @default("General")
+  isPublic    Boolean  @default(true)
+  downloads   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublic, category])
+}
+
+// Media library
+model Media {
+  id           String   @id @default(cuid())
+  fileName     String
+  originalName String
+  url          String
+  mimeType     String
+  fileSize     Int
+  folder       String   @default("uploads")
+  altText      String?
+  createdAt    DateTime @default(now())
+
+  @@index([folder])
+  @@index([createdAt])
+}
+
+// News articles
+model News {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  content         String    @db.Text
+  excerpt         String?
+  featuredImage   String?
+  isPublished     Boolean   @default(false)
+  publishedAt     DateTime?
+  metaDescription String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([isPublished, publishedAt])
+}

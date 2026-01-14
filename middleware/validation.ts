@@ -92,6 +92,148 @@ export function validateData<T>(schema: z.Schema<T>, data: unknown): { success: 
   }
 }
 
+// ===========================================
+// CMS Content Validation Schemas
+// ===========================================
+
+// Facility validation
+export const facilitySchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters').max(200),
+  slug: z.string().min(2, 'Slug is required').max(200).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase with hyphens only'),
+  description: z.string().min(10, 'Description must be at least 10 characters'),
+  shortDescription: z.string().max(300).optional(),
+  address: z.string().min(5, 'Address is required'),
+  city: z.string().min(2, 'City is required'),
+  state: z.string().min(2, 'State is required'),
+  zip: z.string().optional(),
+  phone: z.string().optional(),
+  email: z.string().email().optional().or(z.literal('')),
+  website: z.string().url().optional().or(z.literal('')),
+  capacity: z.number().int().positive().optional().nullable(),
+  amenities: z.array(z.string()).optional().default([]),
+  sportTypes: z.array(z.string()).optional().default([]),
+  featuredImage: z.string().optional(),
+  isPublic: z.boolean().default(true),
+  isFeatured: z.boolean().default(false),
+  mapEmbedUrl: z.string().optional(),
+});
+
+// Facility photo validation
+export const facilityPhotoSchema = z.object({
+  facilityId: z.string().min(1, 'Facility ID is required'),
+  url: z.string().url('Invalid URL'),
+  caption: z.string().max(200).optional(),
+  sortOrder: z.number().int().default(0),
+});
+
+// Testimonial validation
+export const testimonialSchema = z.object({
+  quote: z.string().min(10, 'Quote must be at least 10 characters').max(1000),
+  personName: z.string().min(2, 'Person name is required'),
+  personTitle: z.string().max(100).optional(),
+  organization: z.string().max(100).optional(),
+  eventName: z.string().max(200).optional(),
+  rating: z.number().int().min(1).max(5).optional().nullable(),
+  photoUrl: z.string().optional(),
+  isActive: z.boolean().default(true),
+  isFeatured: z.boolean().default(false),
+  sortOrder: z.number().int().default(0),
+});
+
+// Attraction validation
+export const attractionSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters').max(200),
+  slug: z.string().min(2, 'Slug is required').max(200).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase with hyphens only'),
+  description: z.string().min(10, 'Description must be at least 10 characters'),
+  category: z.enum(['outdoor', 'museum', 'dining', 'entertainment', 'shopping', 'other']),
+  address: z.string().optional(),
+  city: z.string().min(2, 'City is required'),
+  phone: z.string().optional(),
+  website: z.string().url().optional().or(z.literal('')),
+  imageUrl: z.string().optional(),
+  isActive: z.boolean().default(true),
+  isFeatured: z.boolean().default(false),
+  sortOrder: z.number().int().default(0),
+});
+
+// Accommodation validation
+export const accommodationSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters').max(200),
+  slug: z.string().min(2, 'Slug is required').max(200).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase with hyphens only'),
+  description: z.string().optional(),
+  type: z.enum(['hotel', 'motel', 'campground', 'bnb', 'other']),
+  address: z.string().min(5, 'Address is required'),
+  city: z.string().min(2, 'City is required'),
+  phone: z.string().optional(),
+  email: z.string().email().optional().or(z.literal('')),
+  website: z.string().url().optional().or(z.literal('')),
+  bookingUrl: z.string().url().optional().or(z.literal('')),
+  priceRange: z.enum(['$', '$$', '$$$', '$$$$']).optional().nullable(),
+  roomCount: z.number().int().positive().optional().nullable(),
+  amenities: z.array(z.string()).optional().default([]),
+  imageUrl: z.string().optional(),
+  isPartner: z.boolean().default(false),
+  isActive: z.boolean().default(true),
+  isFeatured: z.boolean().default(false),
+  sortOrder: z.number().int().default(0),
+});
+
+// Partner validation
+export const partnerSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters').max(200),
+  slug: z.string().min(2, 'Slug is required').max(200).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase with hyphens only'),
+  description: z.string().optional(),
+  logoUrl: z.string().optional(),
+  website: z.string().url().optional().or(z.literal('')),
+  tier: z.enum(['PRESENTING', 'GOLD', 'SILVER', 'BRONZE', 'COMMUNITY']).default('COMMUNITY'),
+  isActive: z.boolean().default(true),
+  sortOrder: z.number().int().default(0),
+});
+
+// FAQ validation
+export const faqSchema = z.object({
+  question: z.string().min(5, 'Question must be at least 5 characters').max(500),
+  answer: z.string().min(10, 'Answer must be at least 10 characters'),
+  category: z.string().default('General'),
+  isActive: z.boolean().default(true),
+  sortOrder: z.number().int().default(0),
+});
+
+// Resource validation
+export const resourceSchema = z.object({
+  title: z.string().min(2, 'Title must be at least 2 characters').max(200),
+  description: z.string().optional(),
+  fileUrl: z.string().url('File URL is required'),
+  fileName: z.string().min(1, 'File name is required'),
+  fileType: z.string().min(1, 'File type is required'),
+  fileSize: z.number().int().optional().nullable(),
+  category: z.string().default('General'),
+  isPublic: z.boolean().default(true),
+});
+
+// Media validation
+export const mediaSchema = z.object({
+  fileName: z.string().min(1, 'File name is required'),
+  originalName: z.string().min(1, 'Original file name is required'),
+  url: z.string().url('URL is required'),
+  mimeType: z.string().min(1, 'MIME type is required'),
+  fileSize: z.number().int().positive('File size must be positive'),
+  folder: z.string().default('uploads'),
+  altText: z.string().max(200).optional(),
+});
+
+// News validation
+export const newsSchema = z.object({
+  title: z.string().min(3, 'Title must be at least 3 characters').max(200),
+  slug: z.string().min(2, 'Slug is required').max(200).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase with hyphens only'),
+  content: z.string().min(50, 'Content must be at least 50 characters'),
+  excerpt: z.string().max(500).optional(),
+  featuredImage: z.string().optional(),
+  isPublished: z.boolean().default(false),
+  publishedAt: z.string().or(z.date()).optional().nullable(),
+  metaDescription: z.string().max(160).optional(),
+});
+
 // reCAPTCHA verification
 export async function verifyRecaptcha(token: string): Promise<boolean> {
   try {

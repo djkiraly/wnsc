@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { Settings, Layout, Mail, Shield } from 'lucide-react';
+import { Settings, Layout, Mail, Shield, HardDrive } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import SettingsForm from './SettingsForm';
 import HomepageSettings from './HomepageSettings';
 import EmailSettings from './EmailSettings';
 import SecuritySettings from './SecuritySettings';
+import StorageSettings from './StorageSettings';
 
 interface SettingsTabsProps {
   settings: Record<string, string>;
@@ -25,6 +26,7 @@ const tabs: Tab[] = [
   { id: 'general', label: 'General', icon: Settings },
   { id: 'homepage', label: 'Homepage', icon: Layout },
   { id: 'email', label: 'Email', icon: Mail, superAdminOnly: true },
+  { id: 'storage', label: 'Storage', icon: HardDrive, superAdminOnly: true },
   { id: 'security', label: 'Security', icon: Shield, superAdminOnly: true },
 ];
 
@@ -65,6 +67,7 @@ export default function SettingsTabs({ settings, activeTab, userRole }: Settings
       {activeTab === 'general' && <SettingsForm settings={settings} />}
       {activeTab === 'homepage' && <HomepageSettings settings={settings} />}
       {activeTab === 'email' && userRole === 'SUPER_ADMIN' && <EmailSettings />}
+      {activeTab === 'storage' && userRole === 'SUPER_ADMIN' && <StorageSettings />}
       {activeTab === 'security' && userRole === 'SUPER_ADMIN' && <SecuritySettings settings={settings} />}
     </div>
   );
