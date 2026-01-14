@@ -2,14 +2,13 @@ module.exports = {
   apps: [
     {
       name: 'wnsc-website',
-      script: 'npm',
-      args: 'start',
+      script: 'node_modules/.bin/next',
+      args: 'start -p 3001',
       cwd: './',
-      instances: 2,
-      exec_mode: 'cluster',
+      instances: 1,
+      exec_mode: 'fork',
       env: {
         NODE_ENV: 'production',
-        PORT: 3000,
       },
       error_file: './logs/err.log',
       out_file: './logs/out.log',
