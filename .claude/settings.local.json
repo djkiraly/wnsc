@@ -22,7 +22,9 @@
       "Bash(npm install:*)",
       "Bash(npx prisma db push:*)",
       "Bash(xargs cat:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npm audit:*)",
+      "Bash(npm uninstall:*)"
     ]
   }
 }
