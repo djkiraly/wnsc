@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { getCurrentUser, hasRole } from '@/lib/auth';
 
@@ -44,6 +45,12 @@ export async function POST(request: NextRequest) {
     );
 
     await Promise.all(updates);
+
+    // Revalidate pages that use settings
+    revalidatePath('/');
+    revalidatePath('/about');
+    revalidatePath('/contact');
+    revalidatePath('/events');
 
     return NextResponse.json({ success: true, message: 'Settings updated' });
   } catch (error) {
