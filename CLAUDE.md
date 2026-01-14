@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Western Nebraska Sports Council (WNSC) website - a Next.js 15 application with a public-facing website and admin CMS dashboard. Uses PostgreSQL (Neon) with Prisma ORM.
+Western Nebraska Sports Council (WNSC) website - a Next.js 16 application with a public-facing website and admin CMS dashboard. Uses PostgreSQL (Neon) with Prisma ORM.
 
 ## Development Commands
 
@@ -41,9 +41,11 @@ npm run prisma:seed      # Seed database with initial data
   - `gcs.ts` - Google Cloud Storage for file uploads
   - `encryption.ts` - Encryption for sensitive stored credentials
 
-- **`middleware/`** - Request middleware
+- **`middleware/`** - Request middleware utilities
   - `rateLimiter.ts` - Rate limiting
   - `validation.ts` - Zod-based request validation
+
+- **`proxy.ts`** - Next.js 16 proxy (formerly middleware) for auth protection
 
 ### Authentication & Authorization
 
@@ -82,10 +84,30 @@ export async function GET() {
 
 ## Key Configuration
 
+- **Next.js 16** with Turbopack (default bundler)
 - TypeScript strict mode with `noUncheckedIndexedAccess`
+- ES Modules (`"type": "module"` in package.json)
 - Path alias: `@/*` maps to project root
 - Tailwind colors: `primary` (blue #2563EB), `secondary` (amber #F59E0B), `accent` (emerald #10B981)
 - Server actions body size limit: 5mb
+
+### Next.js 16 Patterns
+
+Dynamic route params and searchParams are async Promises:
+
+```typescript
+// Page component with params
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  // ...
+}
+
+// Page component with searchParams
+export default async function Page({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q } = await searchParams;
+  // ...
+}
+```
 
 ## Environment Setup
 

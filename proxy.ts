@@ -12,7 +12,7 @@ const authExemptRoutes = ['/login', '/forgot-password', '/reset-password'];
 // Public routes that don't require authentication
 const publicRoutes = ['/', '/about', '/events', '/contact', '/resources', '/api/contacts', '/api/newsletter', '/api/events'];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow auth-exempt routes (login, forgot password, etc.)

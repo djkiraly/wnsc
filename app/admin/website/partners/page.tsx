@@ -42,7 +42,7 @@ export default async function PartnersPage() {
       {/* Partners by Tier */}
       <div className="space-y-8">
         {tierOrder.map((tier) => {
-          const tierPartners = groupedPartners[tier];
+          const tierPartners = groupedPartners[tier] ?? [];
           if (tierPartners.length === 0) return null;
 
           return (
