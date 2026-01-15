@@ -5,7 +5,11 @@ import prisma from '@/lib/prisma';
 import { encrypt } from '@/lib/encryption';
 
 export async function GET(request: NextRequest) {
-  const baseUrl = process.env.NEXTAUTH_URL || request.nextUrl.origin;
+  // Use NEXTAUTH_URL first, then detect from forwarded headers for reverse proxy support
+  const forwardedHost = request.headers.get('x-forwarded-host');
+  const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
+  const baseUrl = process.env.NEXTAUTH_URL ||
+    (forwardedHost ? `${forwardedProto}://${forwardedHost}` : request.nextUrl.origin);
 
   try {
     // Verify user is still authenticated and is SUPER_ADMIN

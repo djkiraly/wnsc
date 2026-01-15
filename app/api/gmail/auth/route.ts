@@ -54,7 +54,11 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const baseUrl = process.env.NEXTAUTH_URL || request.nextUrl.origin;
+    // Use NEXTAUTH_URL first, then detect from forwarded headers for reverse proxy support
+    const forwardedHost = request.headers.get('x-forwarded-host');
+    const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
+    const baseUrl = process.env.NEXTAUTH_URL ||
+      (forwardedHost ? `${forwardedProto}://${forwardedHost}` : request.nextUrl.origin);
     const redirectUri = `${baseUrl}/api/gmail/callback`;
 
     const oauth2Client = new google.auth.OAuth2(
